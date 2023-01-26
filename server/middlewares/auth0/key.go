@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 )
 
 type JSONWebKeys struct {
@@ -28,7 +27,7 @@ func FetchJWKS(auth0Domain string) (*JWKS, error) {
 	defer resp.Body.Close()
 
 	jwks := &JWKS{}
-	err = json.NetDecoder(resp.Body).Decode(jwks)
+	err = json.NewDecoder(resp.Body).Decode(jwks)
 
 	return jwks, err
 }
