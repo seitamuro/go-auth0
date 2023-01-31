@@ -29,7 +29,11 @@ function App() {
   const [error, setError] = useState(null);
 
   const onClickLogin = () => {
-    loginWithRedirect()
+    loginWithRedirect({
+      authorizationParams: {
+        redirect_uri: 'http://localhost:3000/'
+      }
+    })
   }
 
   const onClickCall = async () => {

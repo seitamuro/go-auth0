@@ -12,8 +12,9 @@ import (
 func NewMiddleware(domain, clientID string, jwks *JWKS) (*jwtmiddleware.JWTMiddleware, error) {
 	return jwtmiddleware.New(jwtmiddleware.Options{
 		ValidationKeyGetter: newValidationKeyGetter(domain, clientID, jwks),
-		SigningMethod:       jwt.SigningMethodES256,
-		ErrorHandler:        func(w http.ResponseWriter, r *http.Request, err string) {},
+		// JWTで使われている署名アルゴリズムを指定する
+		SigningMethod: jwt.SigningMethodRS256,
+		ErrorHandler:  func(w http.ResponseWriter, r *http.Request, err string) {},
 	}), nil
 }
 
@@ -24,6 +25,7 @@ func newValidationKeyGetter(domain, clientID string, jwks *JWKS) func(*jwt.Token
 			return token, errors.New("invalid claims type")
 		}
 
+		// azpフィールドを見て、適切なClientIDのJWTかチェックする
 		azp, ok := claims["azp"].(string)
 		if !ok {
 			return nil, errors.New("authorized parties are required")
@@ -32,21 +34,24 @@ func newValidationKeyGetter(domain, clientID string, jwks *JWKS) func(*jwt.Token
 			return nil, errors.New("invalid authorized parties")
 		}
 
+		// issフィールドを見て、正しいトークン発行者か確認する
 		iss := fmt.Sprintf("https://%s/", domain)
 		ok = token.Claims.(jwt.MapClaims).VerifyIssuer(iss, true)
 		if !ok {
 			return nil, errors.New("invalid issuer")
 		}
 
+		// JWTの検証に必要な鍵を生成する
 		cert, err := getPemCert(jwks, token)
 		if err != nil {
 			return nil, err
 		}
 
-		return jwt.ParseRSAPrivateKeyFromPEM([]byte(cert))
+		return jwt.ParseRSAPublicKeyFromPEM([]byte(cert))
 	}
 }
 
+// JWKSからJWTで使われているキーをPEM形式で返す
 func getPemCert(jwks *JWKS, token *jwt.Token) (string, error) {
 	cert := ""
 

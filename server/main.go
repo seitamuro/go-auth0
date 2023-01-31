@@ -1,3 +1,6 @@
+// server/main.go
+// APIのエントリポイント
+
 package main
 
 import (
@@ -5,49 +8,23 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/rs/cors"
 	v1 "github.com/seitamuro/go-auth0/server/handlers/v1"
-	"github.com/seitamuro/go-auth0/server/handlers/v1/users/me"
-	"github.com/seitamuro/go-auth0/server/middlewares/auth0"
 )
 
 const (
-	port     = 8000
-	domain   = "dev-uar0oom8zc0uw5mx.us.auth0.com"
-	clientID = "PyEYpBm8WZOqTOtj3scgFpVneJoZWAMV"
+	port = 8000
 )
 
 func main() {
-	jwks, err := auth0.FetchJWKS(domain)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	jwtMiddleware, err := auth0.NewMiddleware(domain, clientID, jwks)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	mux := http.NewServeMux()
-
+	// /v1へのリクエストが来た場合のハンドラを追加
 	mux.HandleFunc("/v1", v1.HandleIndex)
-
-	mux.Handle("/v1/users/me", auth0.UseJWT(http.HandlerFunc(me.HandleIndex)))
-
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000"},
-		AllowedHeaders:   []string{"Authorization", "Content-Type"},
-		AllowCredentials: true,
-		Debug:            true,
-	})
-
-	wrappedMux := auth0.WithJWTMiddleware(jwtMiddleware)(mux)
-	wrappedMux = c.Handler(wrappedMux)
 
 	addr := fmt.Sprintf(":%d", port)
 
+	// localhost:8000 でサーバーを立ち上げる
 	log.Printf("Listening on %s", addr)
-	if err := http.ListenAndServe(addr, wrappedMux); err != nil {
+	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatal(err)
 	}
 }
