@@ -20,7 +20,7 @@ type JWKS struct {
 }
 
 func FetchJWKS(auth0Domain string) (*JWKS, error) {
-	resp, err := http.Get(fmt.Sprintf("http://%s/.well-known/jwks.json", auth0Domain))
+	resp, err := http.Get(fmt.Sprintf("https://%s/.well-known/jwks.json", auth0Domain))
 	if err != nil {
 		return nil, err
 	}

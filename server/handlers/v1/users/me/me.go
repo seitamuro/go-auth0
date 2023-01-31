@@ -49,6 +49,7 @@ func HandleIndex(w http.ResponseWriter, r *http.Request) {
 	res, err := json.Marshal(user)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.Write(res)
