@@ -2,6 +2,7 @@ package auth0
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
@@ -32,6 +33,8 @@ func UseJWT(next http.Handler) http.Handler {
 		// ContextからJWTMiddlewareを取得
 		jwtm := r.Context().Value(JWTMiddlewareKey{}).(*jwtmiddleware.JWTMiddleware)
 		// リクエスト中のJWTを検証
+		fmt.Println("-----")
+		fmt.Println(r)
 		if err := jwtm.CheckJWT(w, r); err != nil {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
@@ -43,10 +46,12 @@ func UseJWT(next http.Handler) http.Handler {
 				// リクエストのContextにJWTを保存する
 				ctx := context.WithValue(r.Context(), JWTKey{}, token)
 				// 新しいContextを入れて次の処理に渡す
+				fmt.Println("++++++")
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
 		}
+		fmt.Println("*********")
 		next.ServeHTTP(w, r)
 	})
 }

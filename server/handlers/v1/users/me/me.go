@@ -34,6 +34,7 @@ func getUser(sub string) *User {
 }
 
 func HandleIndex(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("*******")
 	token := auth0.GetJWT(r.Context())
 	fmt.Printf("jwt %+v\n", token)
 
@@ -41,6 +42,7 @@ func HandleIndex(w http.ResponseWriter, r *http.Request) {
 	sub := claims["sub"].(string)
 
 	user := getUser(sub)
+	fmt.Printf(sub)
 	if user == nil {
 		http.Error(w, "user not found", http.StatusNotFound)
 		return

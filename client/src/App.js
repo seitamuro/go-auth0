@@ -12,6 +12,7 @@ const useAuth0Token = () => {
   useEffect(() => {
     const fetchToken = async () => {
       setAccessToken(await getAccessTokenSilently());
+      console.log(accessToken)
     };
 
     if(isAuthenticated) {
@@ -31,13 +32,15 @@ function App() {
   const onClickLogin = () => {
     loginWithRedirect({
       authorizationParams: {
-        redirect_uri: 'http://localhost:3000/'
+        redirect_uri: 'http://localhost:3000/',
+        client_secret: 'QRjE9jm1he3fF1oCQAGXheQts_nNvejsYLzKr6G6dSrPYi7tYqhYRucvDpQCUaVY',
       }
     })
   }
 
   const onClickCall = async () => {
     try {
+      console.log(token)
       const res = await fetch(`${API_URL}/v1/users/me`, {
         method: "GET",
         mode: "cors",
